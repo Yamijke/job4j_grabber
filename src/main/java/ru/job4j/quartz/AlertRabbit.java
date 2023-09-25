@@ -3,8 +3,6 @@ package ru.job4j.quartz;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -18,6 +16,8 @@ import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit implements AutoCloseable {
 
+    private final Properties config = new Properties();
+
     private Connection cn;
 
     public AlertRabbit() {
@@ -25,8 +25,10 @@ public class AlertRabbit implements AutoCloseable {
     }
 
     private void init() {
-        try (InputStream in = new FileInputStream("src/main/resources/rabbit.properties")) {
-            Properties config = new Properties();
+        try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
+            if (in == null) {
+                throw new RuntimeException("properties are not found");
+            }
             config.load(in);
             Class.forName(config.getProperty("driver-class-name"));
             cn = DriverManager.getConnection(
@@ -39,10 +41,6 @@ public class AlertRabbit implements AutoCloseable {
         }
     }
 
-    public Connection getConnection() {
-        return cn;
-    }
-
     @Override
     public void close() throws SQLException {
         if (cn != null) {
@@ -53,17 +51,16 @@ public class AlertRabbit implements AutoCloseable {
     public static void main(String[] args) {
         try (AlertRabbit ar = new AlertRabbit()) {
             List<Long> store = new ArrayList<>();
-            Properties properties = prop();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
             data.put("store", store);
-            data.put("connection", ar.getConnection());
+            data.put("connection", ar.cn);
             JobDetail job = newJob(Rabbit.class)
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(Integer.parseInt(properties.getProperty("rabbit.interval")))
+                    .withIntervalInSeconds(Integer.parseInt(ar.config.getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -76,19 +73,6 @@ public class AlertRabbit implements AutoCloseable {
         } catch (Exception se) {
             se.printStackTrace();
         }
-    }
-
-    public static Properties prop() {
-        Properties times = new Properties();
-        try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
-            if (in == null) {
-                throw new RuntimeException("properties are not found");
-            }
-            times.load(in);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return times;
     }
 
     public static class Rabbit implements Job {
