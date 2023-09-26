@@ -15,17 +15,22 @@ public class HabrCareerParse {
     private static final String PAGE_LINK = String.format("%s/vacancies/java_developer", SOURCE_LINK);
 
     public static void main(String[] args) throws IOException {
-        Connection connection = Jsoup.connect(PAGE_LINK);
-        Document document = connection.get();
-        Elements rows = document.select(".vacancy-card__inner");
-        rows.forEach(row -> {
-            Element titleElement = row.select(".vacancy-card__title").first();
-            Element linkElement = titleElement.child(0);
-            String vacancyName = titleElement.text();
-            Element vacancyElement = row.select(".basic-date").first();
-            String vacancyDate = vacancyElement.attr("datetime");
-            String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
-            System.out.printf("%s %s %s%n", vacancyName, link, vacancyDate);
-        });
+        int currentPage = 1;
+        while (currentPage <= 5) {
+            String url = PAGE_LINK + "?page=" + currentPage;
+            Connection connection = Jsoup.connect(url);
+            Document document = connection.get();
+            Elements rows = document.select(".vacancy-card__inner");
+            rows.forEach(row -> {
+                Element titleElement = row.select(".vacancy-card__title").first();
+                Element linkElement = titleElement.child(0);
+                String vacancyName = titleElement.text();
+                Element vacancyElement = row.select(".basic-date").first();
+                String vacancyDate = vacancyElement.attr("datetime");
+                String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+                System.out.printf("%s %s %s%n", vacancyName, link, vacancyDate);
+            });
+            currentPage++;
+        }
     }
 }
