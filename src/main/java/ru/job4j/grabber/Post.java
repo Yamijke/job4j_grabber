@@ -28,20 +28,20 @@ public class Post {
             return false;
         }
         Post post = (Post) o;
-        return id == post.id && Objects.equals(link, post.link) && Objects.equals(created, post.created);
+        return id == post.id && Objects.equals(title, post.title) && Objects.equals(link, post.link);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, link, created);
+        return Objects.hash(id, title, link);
     }
 
     @Override
     public String toString() {
         return "Post{"
                 + "id=" + id
+                + ", title='" + title + '\''
                 + ", link='" + link + '\''
-                + ", created=" + created
                 + '}';
     }
 }
