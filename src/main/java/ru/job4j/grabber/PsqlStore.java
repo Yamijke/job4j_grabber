@@ -1,9 +1,6 @@
 package ru.job4j.grabber;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -82,34 +79,6 @@ public class PsqlStore implements Store, AutoCloseable {
     public void close() throws Exception {
         if (cnn != null) {
             cnn.close();
-        }
-    }
-
-    public static void main(String[] args) throws SQLException {
-        Properties prop = new Properties();
-        try (InputStream in = PsqlStore.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
-            if (in == null) {
-                System.out.println("Unable to find config file");
-                return;
-            }
-            prop.load(in);
-            PsqlStore psq = new PsqlStore(prop);
-            Post post = new Post(1, "JavaMid", "link/111111111", "text about vacancy", LocalDateTime.now());
-            Post post1 = new Post(2, "JavaJun", "link/22222222", "text about vacancy", LocalDateTime.now());
-            Post post2 = new Post(3, "JavaSen", "link/33333333", "text about vacancy", LocalDateTime.now());
-            Post post3 = new Post(4, "JavaMid", "link/111111111", "text about vacancy", LocalDateTime.now());
-            psq.save(post);
-            psq.save(post1);
-            psq.save(post2);
-            psq.save(post3);
-            List<Post> posts = psq.getAll();
-            for (Post pst : posts) {
-                System.out.println(pst);
-            }
-            Post found = psq.findById(post2.getId());
-            System.out.println(found);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }
