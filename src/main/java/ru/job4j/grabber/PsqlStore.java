@@ -25,6 +25,16 @@ public class PsqlStore implements Store, AutoCloseable {
         );
     }
 
+    private Post createPost(ResultSet rs) throws SQLException {
+        return new Post(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("text"),
+                rs.getString("link"),
+                rs.getTimestamp("created").toLocalDateTime()
+        );
+    }
+
     @Override
     public void save(Post post) {
         try (PreparedStatement ps = cnn.prepareStatement(
@@ -46,12 +56,7 @@ public class PsqlStore implements Store, AutoCloseable {
         try (PreparedStatement ps = cnn.prepareStatement("SELECT * FROM post")) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String name = rs.getString("name");
-                String text = rs.getString("text");
-                String link = rs.getString("link");
-                Timestamp created = rs.getTimestamp("created");
-                post.add(new Post(id, name, text, link, created.toLocalDateTime()));
+                post.add(createPost(rs));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -61,22 +66,16 @@ public class PsqlStore implements Store, AutoCloseable {
 
     @Override
     public Post findById(int id) {
-        Post post = null;
         try (PreparedStatement ps = cnn.prepareStatement("SELECT * FROM post WHERE id = ?")) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                int postId = rs.getInt("id");
-                String name = rs.getString("name");
-                String text = rs.getString("text");
-                String link = rs.getString("link");
-                Timestamp created = rs.getTimestamp("created");
-                post = new Post(postId, name, text, link, created.toLocalDateTime());
+                return createPost(rs);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return post;
+        return null;
     }
 
     @Override
