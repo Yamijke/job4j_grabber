@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class HabrCareerParse implements Parse {
     public List<Post> list(String link) throws IOException {
         List<Post> result = new ArrayList<>();
         int currentPage = 1;
-        while (currentPage <= 1) {
+        while (currentPage <= 5) {
             String url = PAGE_LINK + "?page=" + currentPage;
             Connection connection = Jsoup.connect(url);
             Document document = connection.get();
@@ -63,8 +62,7 @@ public class HabrCareerParse implements Parse {
                 String vacancyName = titleElement.text();
                 Element vacancyElement = row.select(".basic-date").first();
                 String vacancyDate = vacancyElement.attr("datetime");
-                DateTimeFormatter dtf = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-                LocalDateTime dateRes = LocalDateTime.parse(vacancyDate, dtf);
+                LocalDateTime dateRes = dateTimeParser.parse(vacancyDate);
                 String vacLink = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
                 String description = retrieveDescription(vacLink);
                 result.add(new Post(id, vacancyName, vacLink, description, dateRes));
