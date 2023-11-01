@@ -52,8 +52,8 @@ public class Post {
 
     @Override
     public String toString() {
-        return "Post{" +
-                "id=" + id
+        return "Post{"
+                + "id=" + id
                 + ", text='" + text + '\''
                 + ", comments=" + comments
                 + '}';
