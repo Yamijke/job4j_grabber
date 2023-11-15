@@ -30,8 +30,8 @@ public class Comment {
     @Override
     public String toString() {
         return "Comment{"
-                + "text='" + text + '\''
-                + ", user=" + user
+                + "text='" + text + '\''  + System.lineSeparator()
+                + ", user=" + user  + System.lineSeparator()
                 + '}';
     }
 }

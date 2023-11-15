@@ -53,9 +53,9 @@ public class Post {
     @Override
     public String toString() {
         return "Post{"
-                + "id=" + id
-                + ", text='" + text + '\''
-                + ", comments=" + comments
+                + "id=" + id  + System.lineSeparator()
+                + ", text='" + text + '\''  + System.lineSeparator()
+                + ", comments=" + comments  + System.lineSeparator()
                 + '}';
     }
 }
